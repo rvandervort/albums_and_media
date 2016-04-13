@@ -14,7 +14,6 @@
 ActiveRecord::Schema.define(version: 20160413185643) do
 
   create_table "albums", force: :cascade do |t|
-    t.integer  "user_id"
     t.string   "name"
     t.integer  "position"
     t.date     "average_date"
@@ -22,10 +21,7 @@ ActiveRecord::Schema.define(version: 20160413185643) do
     t.datetime "updated_at",   null: false
   end
 
-  add_index "albums", ["user_id"], name: "index_albums_on_user_id"
-
   create_table "photos", force: :cascade do |t|
-    t.integer  "user_id"
     t.integer  "album_id"
     t.string   "name"
     t.text     "description"
@@ -36,13 +32,5 @@ ActiveRecord::Schema.define(version: 20160413185643) do
   end
 
   add_index "photos", ["album_id"], name: "index_photos_on_album_id"
-  add_index "photos", ["user_id"], name: "index_photos_on_user_id"
-
-  create_table "users", force: :cascade do |t|
-    t.string   "name"
-    t.string   "email"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
 
 end
