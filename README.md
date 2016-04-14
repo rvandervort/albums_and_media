@@ -1,22 +1,23 @@
 # Forever Challenge
-Please clone this project and create a branch with your changes that fulfill the requirements below.  If you need to make an assumption about a vague requirement, feel free to do so, but please state that assumption at the bottom of this Readme.  Try to fulfill all of the requirements as if this application is going to be deployed into the real world with heavy usage.
+Please clone this project and create a branch with your changes and fulfill the requirements below.  If you need to make an assumption about a vague requirement, feel free to do so, but please state that assumption at the bottom of this Readme.  Try to fulfill all of the requirements as if this application is going to be deployed into the real world with heavy usage.
 
 
 # Requirements
 1. Add basic API actions (index, show, create, update and destroy) to the albums_controller and photos_controller.
-2. The index route for photos should look like /album/:album_id/photos.
-3. The API index actions should return JSON with all available fields for the record AND a field for the total number of records.
-4. The API should use pagination with a max of 10 items per page and accept a param to iterate through pages.
-5. When creating or updating a photo, ensure that the photo's url ends with the string ".jpeg" or ".jpg".
-6. Ensure that no more than 60 photos can be added to an album.
-7. Create a JSON controller action that can add multiple photos to an album at once.  This should be a POST to /album/:id/add_photos.
-8. Ensure that the show action for photos returns the name and id for all the albums it belongs to.
+2. The albums index actions should return JSON with all available fields for the record AND a field for the total number of photos in the album.
+3. The API index actions should use pagination with a max of 10 items per page and accept a param to iterate through pages.
+4. An album's show action should return data for each photo in the album.
+5. Ensure that every album has a name.
+6. Ensure that every photo record belongs to an album, has a name and a url that ends with the string ".jpeg" or ".jpg".
+7. Ensure that no more than 60 photos can be added to an album.
+8. Create or modify a controller action so that multiple photos can be added to an album from one request.
 9. Ensure that an album's average_date field is always the average taken_at date of all associated photos (or nil if the album has no photos).
 
 
 # Bonus
 
-1. Create a model and controller for videos.  This should be similar to photos in how it can be added to albums.  Albums should return a list of photos and videos.
+1. Allow the API to add videos to an album.  The album index action should return a combination of photos and videos.
+2. Allow photos to be added to multiple albums.
 
 
 # Tech Specs
