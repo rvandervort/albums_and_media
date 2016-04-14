@@ -22,8 +22,10 @@ Please clone this project and create a branch with your changes and fulfill the 
 
 # Tech Specs
 Rails 4.2.6
-SQLite preferred, Postgres OK
-Anything can be changed if you think it's needed, including gemfile, database schema, configs, etc.
+
+SQLite is preferred. Postgres is ok.
+
+Anything can be changed if you think it's needed, including the gemfile, database schema, configs, etc.
 
 
 # Getting Started
