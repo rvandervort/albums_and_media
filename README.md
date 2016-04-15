@@ -1,5 +1,5 @@
 # Forever Challenge
-Please clone this project and create a branch with your changes and fulfill the requirements below.  If you need to make an assumption about a vague requirement, feel free to do so, but please state that assumption at the bottom of this Readme.  Try to fulfill all of the requirements as if this application is going to be deployed into the real world with heavy usage.
+Please clone this project and create a fork with your changes and fulfill the requirements below.  If you need to make an assumption about a vague requirement, feel free to do so, but please state that assumption at the bottom of this Readme.  Try to fulfill all of the requirements as if this application is going to be deployed into the real world with heavy usage.
 
 
 # Requirements
