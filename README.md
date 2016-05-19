@@ -15,7 +15,6 @@ Please clone this project and create a branch with your changes and fulfill the 
 
 
 # Bonus
-
 1. Allow the API to add videos to an album.  The album index action should return a combination of photos and videos.
 2. Allow photos to be added to multiple albums.
 
