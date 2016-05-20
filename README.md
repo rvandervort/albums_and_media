@@ -1,5 +1,7 @@
 # Forever Challenge
-Please clone this project and create a branch with your changes and fulfill the requirements below.  If you need to make an assumption about a vague requirement, feel free to do so, but please state that assumption at the bottom of this Readme.  Try to fulfill all of the requirements as if this application is going to be deployed into the real world with heavy usage.
+Please create a fork of this project and fulfill the requirements below.  Upon completion, please send Forever a link to your fork.
+
+If you need to make an assumption about a vague requirement, feel free to do so, but please state that assumption at the bottom of this Readme.  Try to fulfill all of the requirements as if this application is going to be deployed into the real world with heavy usage.
 
 
 # Requirements
@@ -14,7 +16,7 @@ Please clone this project and create a branch with your changes and fulfill the 
 9. Ensure that an album's average_date field is always the average taken_at date of all associated photos (or nil if the album has no photos).
 
 
-# Bonus
+# Bonus (only for senior developers)
 1. Allow the API to add videos to an album.  The album index action should return a combination of photos and videos.
 2. Allow photos to be added to multiple albums.
 
