@@ -37,5 +37,28 @@ RSpec.describe CreateAlbumService do
         expect(result.errors).to be_a(ActiveModel::Errors)
       end
     end
+
+    describe "positioning logic", :db => true do
+      let(:options) { basic_options.merge({album: {name: "Test Album"}}) }
+      
+      it "positions the album at the end, when no :position is supplied" do
+        3.times do |i|
+          Album.create(name: "Album #{i}", position: i)
+        end
+
+        expect(result[:album].position).to eq(3)
+      end
+      
+      it "positions the album and shifts others albums, when the :position is supplied" do
+        albums = 3.times.map { |i| Album.create(name: "Album #{i}", position: i) }
+
+        options[:album][:position] = "1"
+        expect(result[:album].position).to eq(1)
+
+        expect(albums[0].reload.position).to eq(0)
+        expect(albums[1].reload.position).to eq(2)
+        expect(albums[2].reload.position).to eq(3)
+      end
+    end
   end
 end
