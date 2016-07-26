@@ -22,6 +22,7 @@ RSpec.describe UpdateAlbumService do
       let(:options) { base_options.merge(album: {name: "Test Album"}) }
       before :each do
         expect(Album).to receive(:find).and_return(model)
+        expect(model).to receive(:update).and_return(true)
       end
 
       it "returns a successful result" do
@@ -38,6 +39,7 @@ RSpec.describe UpdateAlbumService do
 
       before :each do
         expect(Album).to receive(:find).and_return(model)
+        expect(model).to receive(:update).and_return(false)
       end
       
       it "returns an unsuccessful result" do

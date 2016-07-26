@@ -3,5 +3,5 @@ class Album < ActiveRecord::Base
 
   has_many :photos, dependent: :destroy
 
-  validates_with NameValidator
+  validates_with NameValidator, PositionValidator
 end
