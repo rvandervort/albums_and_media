@@ -25,3 +25,7 @@ group :development, :test do
   gem 'byebug'
   gem 'faker'
 end
+
+group :test do
+  gem 'database_cleaner', '~> 1.5'
+end
