@@ -13,4 +13,20 @@ class AlbumsController < ApplicationController
       end
     end
   end
+
+  def show
+    respond_to do |format|
+      result = FetchAlbumService.invoke(id: params[:id])
+
+      format.json do
+        if result.success?
+          @album = result[:album]
+          render json: @album, status: :ok
+        else
+          render nothing: true, status: :not_found
+        end
+      end
+    end
+
+  end
 end
