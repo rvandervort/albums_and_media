@@ -1,4 +1,6 @@
 class AlbumsController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
   def index
     respond_to do |format|
       format.json do
@@ -27,6 +29,29 @@ class AlbumsController < ApplicationController
         end
       end
     end
+  end
 
+  def create
+    result = CreateAlbumService.invoke(album: create_params)
+
+    respond_to do |format|
+      format.json do
+        if result.success?
+          @album = result[:album]
+
+          response.headers["Location"] = view_context.url_for(@album)
+          render json: @album, status: :created
+        else
+          @errors = {errors: result.errors}
+          render json: @errors, status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
+  private
+
+  def create_params
+    params.require(:album).permit(:name, :position, :description)
   end
 end
