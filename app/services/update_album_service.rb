@@ -1,7 +1,7 @@
 class UpdateAlbumService < ServiceBase
   def execute!
     if album_record
-      update_album 
+      update_album
     else
       invalid_record
     end
@@ -11,7 +11,7 @@ class UpdateAlbumService < ServiceBase
 
   def update_album
     ServiceResult.new.tap do |result|
-      if album_record.update(attributes) 
+      if album_record.update(attributes)
         result.success = true
         result[:album] = album_record
       else
@@ -24,11 +24,11 @@ class UpdateAlbumService < ServiceBase
   def invalid_record
     ServiceResult.new.tap do |result|
       result.success = false
-      result[:errors] = ["Album with id #{id} not found"]
+      result.errors[:base] = ["Album with id #{id} not found"]
     end
   end
 
-  
+
   def id
     options[:id]
   end

@@ -13,7 +13,7 @@ RSpec.describe UpdateAlbumService do
       it "returns an unsuccessful result if the album does not exist" do
         expect(Album).to receive(:find).and_raise(ActiveRecord::RecordNotFound)
         expect(result).not_to be_success
-        expect(result.errors).not_to be_empty
+        expect(result.errors[:base]).to  include("Album with id 1 not found")
       end
     end
 

@@ -2,14 +2,14 @@ class FetchAlbumService < ServiceBase
   def execute!
     result = ServiceResult.new
 
-    begin 
+    begin
       result[:album] = Album.find(id)
       result.success = true
     rescue ActiveRecord::RecordNotFound => arnf
-      result.errors << "Album with id #{id} not found"
+      result.errors[:base] = ["Album with id #{id} not found"]
       result.success = false
     rescue Exception => e
-      result.errors << e.to_s
+      result.errors[:base] = [e.to_s]
       result.success = false
     end
 

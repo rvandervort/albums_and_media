@@ -4,7 +4,7 @@ class ServiceResult
   def initialize
     @success = false
     @properties = Hash.new
-    @properties[:errors] = []
+    @properties[:errors] = {}
   end
 
   def success?

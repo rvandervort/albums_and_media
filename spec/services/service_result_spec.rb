@@ -9,9 +9,11 @@ RSpec.describe ServiceResult do
   end
 
   describe "#errors" do
+    let(:error_list) { {base: ["err 1", "err 2"]} }
+
     it "returns the list of errors in the property hash" do
-      subject[:errors] = ["err1","err2"]
-      expect(subject.errors).to match_array(["err1", "err2"])
+      subject[:errors] =  error_list
+      expect(subject.errors).to eq(error_list)
     end
   end
 end

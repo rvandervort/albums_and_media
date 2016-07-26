@@ -6,7 +6,7 @@ class GetAlbumsService < ServiceBase
       result[:albums] =  paginated_results
       result.success = true
     rescue Exception => e
-      result[:errors]= [e.to_s]
+      result.errors[:base] = [e.to_s]
       result.success = false
     end
 
