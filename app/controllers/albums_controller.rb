@@ -49,9 +49,27 @@ class AlbumsController < ApplicationController
     end
   end
 
+  def update
+    result = UpdateAlbumService.invoke({id: params[:id], album: update_params})
+    respond_to do |format|
+      format.json do
+        if result.success?
+          render nothing: true, status: :ok
+        else
+          @errors = {errors: result.errors}
+          render json: @errors, status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
   private
 
   def create_params
+    params.require(:album).permit(:name, :position, :description)
+  end
+
+  def update_params
     params.require(:album).permit(:name, :position, :description)
   end
 end
