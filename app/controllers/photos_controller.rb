@@ -11,4 +11,18 @@ class PhotosController < ApplicationController
       end
     end
   end
+
+  def show
+    respond_to do |format|
+      result = FetchPhotoService.invoke(id: params[:id])
+
+      format.json do
+        if result.success?
+          @photo = result[:photo]
+        else
+          render nothing: true, status: :not_found
+        end
+      end
+    end
+  end
 end

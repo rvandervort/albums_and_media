@@ -39,4 +39,41 @@ RSpec.describe PhotosController, type: :controller do
       end
     end
   end
+
+  describe '#show' do
+    let(:base_request_attributes) { {format: 'json'} }
+    let(:model) { Photo.new(name: 'test album') }
+
+    let(:successful_result) {
+      ServiceResult.new.tap do |result|
+        result.success = true
+        result[:photo] = model
+      end
+    }
+
+    let(:unsuccessful_result) {
+      ServiceResult.new.tap do |result|
+        result.success = false
+      end
+    }
+
+
+    it 'responds with a 200, if the photo is found' do
+      expect(FetchPhotoService).to receive(:invoke).and_return(successful_result)
+      get :show, base_request_attributes.merge(:id => 1)
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'sets the photo, if the photo is found' do
+      expect(FetchPhotoService).to receive(:invoke).and_return(successful_result)
+      get :show, base_request_attributes.merge(:id => 1)
+      expect(assigns(:photo)).to eq(model)
+    end
+
+    it 'responds with a 404, if the photo is not found' do
+      expect(FetchPhotoService).to receive(:invoke).and_return(unsuccessful_result)
+      get :show, base_request_attributes.merge(:id => 1)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
 end
