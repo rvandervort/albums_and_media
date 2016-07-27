@@ -39,7 +39,7 @@ class AlbumsController < ApplicationController
           @album = result[:album]
 
           response.headers["Location"] = view_context.url_for(@album)
-          render json: @album, status: :created
+          render :show, status: :created
         else
           @errors = {errors: result.errors}
           render json: @errors, status: :unprocessable_entity
