@@ -3,5 +3,7 @@ class Photo < ActiveRecord::Base
 
   include ActiveModel::Validations
 
+  validates :album, presence: true
   validates_with FileExtensionValidator, fields: :url, extensions: ["jpg", "jpeg"]
+  validates_with AlbumFullValidator
 end
