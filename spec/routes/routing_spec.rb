@@ -12,10 +12,6 @@ RSpec.describe "Routing" , type: :routing do
   end
 
   describe "for photos as a top-level resource" do
-    it "does not route GET /photos" do 
-      expect(get("/photos")).not_to be_routable
-    end
-
     it "does not route POST /photos" do 
       expect(post("/photos")).not_to be_routable
     end

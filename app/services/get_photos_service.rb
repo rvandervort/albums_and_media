@@ -1,9 +1,16 @@
 class GetPhotosService < ServiceBase
   def execute!
-    ServiceResult.new.tap do |result|
+    result = ServiceResult.new
+
+    begin
       result[:photos] = retrieve_photos
-      result.success = true
+      result.success = result[:photos].length > 0
+    rescue Exception => e
+      result.errors[:base] = [e.to_s]
+      result.success = false
     end
+
+    result
   end
 
   private
