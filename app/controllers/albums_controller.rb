@@ -74,7 +74,7 @@ class AlbumsController < ApplicationController
             render nothing: true, status: :not_found
           else
             @errors = result.errors
-            render json: @errors, status: :unprocessable_entity
+            render 'shared/errors', status: :unprocessable_entity
           end
         end
       end
