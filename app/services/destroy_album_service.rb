@@ -3,7 +3,7 @@ class DestroyAlbumService < ServiceBase
     if album
       destroy_album
     else
-      basic_error(ServiceResult.new)
+      basic_error(ServiceResult.new, false)
     end
   end
 
@@ -16,7 +16,7 @@ class DestroyAlbumService < ServiceBase
           result.success = true
           shift_other_albums(album.position)
         else
-          basic_error(result)
+          basic_error(result, true)
         end
       end
     end
@@ -26,9 +26,11 @@ class DestroyAlbumService < ServiceBase
     @album ||= retrieve_album
   end
 
-  def basic_error(result)
+  def basic_error(result, album_exists)
     result.success = false
     result.errors[:base] = ["Unable to delete album with id #{id}"]
+
+    result[:album_not_found] = !album_exists
     result
   end
 
