@@ -24,8 +24,6 @@ class AlbumsController < ApplicationController
         if result.success?
           @album = result[:album]
           @photos = result[:photos]
-
-          render json: {album: @album, photos: @photos}, status: :ok
         else
           render nothing: true, status: :not_found
         end
