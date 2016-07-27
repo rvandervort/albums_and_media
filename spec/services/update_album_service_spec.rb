@@ -50,5 +50,64 @@ RSpec.describe UpdateAlbumService do
         expect(result[:errors]).to be_a(ActiveModel::Errors)
       end
     end
+
+
+    describe "positioning logic", :db => true do
+      let(:options) { base_options }
+
+      it "does not shift other albums if there is no update to be made to the position" do
+        albums = 5.times.map { |i| Album.create(name: "Album #{i}", position: i) }
+
+        options[:album].delete(:position)
+        expect(result).to be_success
+
+        albums.each_with_index do |album, index|
+          expect(album.reload.position).to eq(index)
+        end
+      end
+
+      it "does not shift other albums if the positions have not changed" do
+        albums = 5.times.map { |i| Album.create(name: "Album #{i}", position: i) }
+
+        options[:id] = albums.first.id
+        options[:album][:position] = albums.first.position
+
+        expect(result).to be_success
+
+        albums.each_with_index do |album, index|
+          expect(album.reload.position).to eq(index)
+        end
+      end
+
+      it "shifts other albums to the right, if the new position is lower than the old position" do
+        albums = 5.times.map { |i| Album.create(name: "Album #{i}", position: i) }
+
+        # Move position 3 to position 1
+        options[:album][:position] = 1
+        options[:id] = albums[3].id
+
+        expect(result).to be_success
+        expect(albums[0].reload.position).to eq(0)
+        expect(albums[1].reload.position).to eq(2)
+        expect(albums[2].reload.position).to eq(3)
+        expect(albums[3].reload.position).to eq(1)
+        expect(albums[4].reload.position).to eq(4)
+      end
+
+      it "shifts other albums to the left, if the new position is greater than the old position" do
+        albums = 5.times.map { |i| Album.create(name: "Album #{i}", position: i) }
+
+        # Move position 1 to position 3
+        options[:album][:position] = 3
+        options[:id] = albums[1].id
+
+        expect(result).to be_success
+        expect(albums[0].reload.position).to eq(0)
+        expect(albums[1].reload.position).to eq(3)
+        expect(albums[2].reload.position).to eq(1)
+        expect(albums[3].reload.position).to eq(2)
+        expect(albums[4].reload.position).to eq(4)
+      end
+    end
   end
 end
