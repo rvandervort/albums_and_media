@@ -8,7 +8,6 @@ class AlbumsController < ApplicationController
 
         if result.success?
           @albums = result[:albums]
-          render json: @albums, status: :ok
         else
           render nothing: true, status: :unprocessable_entity
         end
