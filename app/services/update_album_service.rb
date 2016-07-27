@@ -85,10 +85,11 @@ class UpdateAlbumService < ServiceBase
   end
 
   def album_record
-    @album ||= begin
-                  Album.find(id)
-               rescue ActiveRecord::RecordNotFound
-                  nil
-               end
+    @album ||= retrieve_album
+  end
+
+  def retrieve_album
+    result = FetchAlbumService.invoke({id: id})
+    result.success? ? result[:album] : nil
   end
 end
