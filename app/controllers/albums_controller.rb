@@ -55,8 +55,8 @@ class AlbumsController < ApplicationController
         if result.success?
           render nothing: true, status: :ok
         else
-          @errors = {errors: result.errors}
-          render json: @errors, status: :unprocessable_entity
+          @errors = result.errors
+          render 'shared/errors', status: :unprocessable_entity
         end
       end
     end

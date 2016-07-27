@@ -184,7 +184,7 @@ RSpec.describe AlbumsController, type: :controller do
 
       it "assigns the @errors" do
         put :update, base_request_attributes.merge(:album => valid_album_attributes)
-        expect(assigns(:errors)).to eq({errors: errors})
+        expect(assigns(:errors)).to eq(errors)
       end
 
     end
