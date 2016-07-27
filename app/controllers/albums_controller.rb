@@ -63,6 +63,25 @@ class AlbumsController < ApplicationController
     end
   end
 
+  def destroy
+    result = DestroyAlbumService.invoke(id: params[:id])
+
+    respond_to do |format|
+      format.json do
+        if result.success?
+          render nothing: true, status: :no_content
+        else
+          if result[:album_not_found]
+            render nothing: true, status: :not_found
+          else
+            @errors = result.errors
+            render json: @errors, status: :unprocessable_entity
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def create_params
