@@ -5,6 +5,8 @@ class FetchAlbumService < ServiceBase
     begin
       result[:album] = Album.find(id)
       result.success = true
+      result[:photos] = retrieve_photos if include_photos?
+
     rescue ActiveRecord::RecordNotFound => arnf
       result.errors[:base] = ["Album with id #{id} not found"]
       result.success = false
@@ -20,5 +22,14 @@ class FetchAlbumService < ServiceBase
 
   def id
     options[:id]
+  end
+
+  def retrieve_photos
+    result = GetPhotosService.invoke(album_id: id)
+    result.success? ? result[:photos] : []
+  end
+
+  def include_photos?
+    !!options[:with_photos]
   end
 end
