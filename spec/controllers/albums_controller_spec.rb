@@ -113,11 +113,12 @@ RSpec.describe AlbumsController, type: :controller do
 
     context "for an invalid request" do
       let(:invalid_album_attributes) { {name: ""} }
+      let(:errors){ ActiveModel::Errors.new(Object.new)  }
       let(:unsuccessful_result) do
         ServiceResult.new.tap do |result|
           result.success = false
           result[:album] = nil
-          result[:errors] = ActiveModel::Errors.new(Object.new)
+          result[:errors] = errors
         end
       end
 
@@ -132,7 +133,7 @@ RSpec.describe AlbumsController, type: :controller do
 
       it "assigns the list of errors" do
         post :create, base_request_attributes.merge(:album => invalid_album_attributes)
-        expect(assigns(:errors)).to eq({errors: unsuccessful_result.errors})
+        expect(assigns(:errors)).to eq(errors)
       end
     end
   end
