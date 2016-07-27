@@ -41,8 +41,8 @@ class AlbumsController < ApplicationController
           response.headers["Location"] = view_context.url_for(@album)
           render :show, status: :created
         else
-          @errors = {errors: result.errors}
-          render json: @errors, status: :unprocessable_entity
+          @errors = result.errors
+          render "shared/errors", status: :unprocessable_entity
         end
       end
     end
