@@ -3,7 +3,8 @@ require 'rails_helper'
 RSpec.describe CreateMultiplePhotosService do
   describe "#execute!" do
     let(:album) { Album.create(name: "Test Album", position: 1) }
-    let(:params) { {photos: photo_list} }
+    let(:params) { {album_id: album.id, photos: photo_list} }
+
     let(:service) { described_class.new(params) }
     let(:result) { service.execute! }
 

@@ -28,11 +28,11 @@ class CreateMultiplePhotosService < ServiceBase
     @all_records_valid = true
 
     photo_attribute_set.each do |attributes|
-      if attributes[:album_id] != album_id
+      if !attributes[:album_id].blank? && attributes[:album_id] != album_id
         attributes[:errors] = {album: "All records must be for album #{album_id}"}
         @all_records_valid = false
       else
-        photo = Photo.new(attributes)
+        photo = Photo.new(params_with_whitelist(attributes))
         @photo_records << photo
 
         unless photo.valid?
@@ -48,10 +48,22 @@ class CreateMultiplePhotosService < ServiceBase
   end
 
   def photo_attribute_set
-    options.fetch(:photos, [])
+    @photo_attribute_set ||= options.fetch(:photos, [])
+  end
+
+  def params_with_whitelist(a)
+    ActionController::Parameters.new(a.merge(album_id: album_id)).permit(*allowed_attributes)
+  end
+
+  def allowed_attributes
+    options.fetch(:allowed_attributes, default_allowed_attributes)
+  end
+
+  def default_allowed_attributes
+    [:name, :url, :description, :album_id, :taken_at]
   end
 
   def album_id
-    @album_id ||= photo_attribute_set.first[:album_id]
+    options[:album_id]
   end
 end

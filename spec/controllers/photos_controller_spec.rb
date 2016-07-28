@@ -80,67 +80,118 @@ RSpec.describe PhotosController, type: :controller do
 
   describe '#create', :db => true do
     let(:base_request_attributes) { {format: 'json', album_id: 5678} }
-    
-    context 'for a valid request, with valid data' do
-      let(:valid_photo_attributes) { {name: "My brand new photo"} }
-      let(:model) { Photo.new(valid_photo_attributes) }
-      let(:successful_result) do
-        ServiceResult.new.tap do |result|
-          result.success = true
-          result[:photo] = model
+
+    context 'for a single photo' do
+      context 'for a valid request, with valid data' do
+        let(:valid_photo_attributes) { {name: "My brand new photo"} }
+        let(:model) { Photo.new(valid_photo_attributes) }
+        let(:successful_result) do
+          ServiceResult.new.tap do |result|
+            result.success = true
+            result[:photo] = model
+          end
+        end
+
+        before :each do
+          # Fake out polymorphic routes #handle_model so
+          # we get back /albums/5678/photo/1123 when asking for the model's url
+          model.id = 1123
+          expect(model).to receive(:persisted?).and_return(true)
+
+          expect(CreatePhotoService).to receive(:invoke).and_return(successful_result)
+        end
+
+        it "returns status 201 created" do
+          post :create, base_request_attributes.merge(:photo => valid_photo_attributes)
+          expect(response).to have_http_status(:created)
+        end
+
+        it "assigns the photo" do
+          post :create, base_request_attributes.merge(:photo => valid_photo_attributes)
+          expect(assigns(:photo)).to eq(model)
+        end
+
+        it "returns the location of the created photo in the response headers" do
+          post :create, base_request_attributes.merge(:photo => valid_photo_attributes)
+          expect(response.headers["Location"]).to match(/photos\/1123/)
         end
       end
 
-      before :each do
-        # Fake out polymorphic routes #handle_model so
-        # we get back /albums/5678/photo/1123 when asking for the model's url
-        model.id = 1123
-        expect(model).to receive(:persisted?).and_return(true)
+      context "for an invalid request" do
+        let(:invalid_photo_attributes) { {name: ""} }
+        let(:errors){ ActiveModel::Errors.new(Object.new)  }
+        let(:unsuccessful_result) do
+          ServiceResult.new.tap do |result|
+            result.success = false
+            result[:photo] = nil
+            result[:errors] = errors
+          end
+        end
 
-        expect(CreatePhotoService).to receive(:invoke).and_return(successful_result)
-      end
+        before :each do
+          expect(CreatePhotoService).to receive(:invoke).and_return(unsuccessful_result)
+        end
 
-      it "returns status 201 created" do
-        post :create, base_request_attributes.merge(:photo => valid_photo_attributes)
-        expect(response).to have_http_status(:created)
-      end
+        it "returns 422 status code" do
+          post :create, base_request_attributes.merge(:photo => invalid_photo_attributes)
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
 
-      it "assigns the photo" do
-        post :create, base_request_attributes.merge(:photo => valid_photo_attributes)
-        expect(assigns(:photo)).to eq(model)
-      end
-
-      it "returns the location of the created photo in the response headers" do
-        post :create, base_request_attributes.merge(:photo => valid_photo_attributes)
-        expect(response.headers["Location"]).to match(/photos\/1123/)
+        it "assigns the list of errors" do
+          post :create, base_request_attributes.merge(:photo => invalid_photo_attributes)
+          expect(assigns(:errors)).to eq(errors)
+        end
       end
     end
 
-    context "for an invalid request" do
-      let(:invalid_photo_attributes) { {name: ""} }
-      let(:errors){ ActiveModel::Errors.new(Object.new)  }
-      let(:unsuccessful_result) do
-        ServiceResult.new.tap do |result|
-          result.success = false
-          result[:photo] = nil
-          result[:errors] = errors
+    context 'for multiplie photos' do
+      let(:photo_list) { [{id: 123}, {id: 234}] }
+
+      before :each do
+        expect(CreateMultiplePhotosService).to receive(:invoke).and_return(service_result)
+        expect(CreatePhotoService).not_to receive(:invoke)
+      end
+
+      context "for a valid request" do
+        let(:service_result) {
+          ServiceResult.new.tap do |result|
+            result.success = true
+            result[:photos] = photo_list
+          end
+        }
+
+        it "returns 201 status code" do
+          post :create, base_request_attributes.merge(:photos => photo_list)
+          expect(response).to have_http_status(:created)
+        end
+
+        it "assigns the :photos" do
+          post :create, base_request_attributes.merge(:photos => photo_list)
+          expect(assigns(:photos)).to eq(photo_list)
         end
       end
 
-      before :each do
-        expect(CreatePhotoService).to receive(:invoke).and_return(unsuccessful_result)
-      end
 
-      it "returns 422 status code" do
-        post :create, base_request_attributes.merge(:photo => invalid_photo_attributes)
-        expect(response).to have_http_status(:unprocessable_entity)
-      end
+      context "for an invalid request" do
+        let(:service_result) {
+          ServiceResult.new.tap do |result|
+            result.success = false
+            result[:attributes_and_errors] = ["an attributes and errors list"]
+          end
+        }
 
-      it "assigns the list of errors" do
-        post :create, base_request_attributes.merge(:photo => invalid_photo_attributes)
-        expect(assigns(:errors)).to eq(errors)
+        it "returns 422 status code" do
+          post :create, base_request_attributes.merge(:photos => photo_list)
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "assigns the photos, with errors for each" do
+          post :create, base_request_attributes.merge(:photos => photo_list)
+          expect(assigns(:photos)).to eq(service_result[:attributes_and_errors])
+        end
       end
     end
+
   end
 
   describe '#update' do
