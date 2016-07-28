@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe CreatePhotoService do
   describe '#execute!' do
-    let(:basic_options) {{ photo: {url: "http://jpg", taken_at: Time.now, name: "Photo Name", album_id: 1}}}
+    let(:basic_options) {{ photo: {url: "http://jpg", taken_at: Time.zone.now.to_s, name: "Photo Name", album_id: 1}}}
     let(:service) { described_class.new(options) }
     let(:result) { service.execute! }
 
@@ -30,7 +30,7 @@ RSpec.describe CreatePhotoService do
           options[:photo][:album_id] = album.id
 
           photo = result[:photo]
-
+         
           expect(photo.album.average_date).to eq(photo.taken_at.to_date)
         end
       end

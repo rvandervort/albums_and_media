@@ -27,7 +27,7 @@ class CreatePhotoService < ServiceBase
   def update_album_average_date(album)
     times = album.photos.pluck(:taken_at).map(&:to_i)
 
-    average_time = Time.at((times.reduce(:+) / times.count).to_i)
+    average_time = Time.zone.at((times.reduce(:+) / times.count).to_i)
 
     album.average_date = average_time.to_date
     album.save
