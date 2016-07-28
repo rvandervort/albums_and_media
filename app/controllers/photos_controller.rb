@@ -77,7 +77,7 @@ class PhotosController < ApplicationController
   private
 
   def create_single
-    result = CreatePhotoService.invoke(photo: create_params.merge(album_id: params[:album_id]))
+    result = CreateMediaService.invoke(photo: create_params.merge(album_id: params[:album_id]))
 
     respond_to do |format|
       format.json do

@@ -1,8 +1,13 @@
 require 'rails_helper'
 
-RSpec.describe CreatePhotoService do
+RSpec.shared_examples "media creation for asset type" do |asset_type, file_extension|
   describe '#execute!' do
-    let(:basic_options) {{ photo: {url: "http://jpg", taken_at: Time.zone.now.to_s, name: "Photo Name", album_id: 1}}}
+    let(:asset_type_name) { asset_type.name.downcase.to_sym }
+    let(:asset_attributes) { {url: "http://domain.com/file.#{file_extension}", taken_at: Time.zone.now.to_s, name: "Asset Name", album_id: 1} }
+    let(:basic_options) do
+       { :media_class => asset_type, "#{asset_type_name}".to_sym => asset_attributes}
+    end
+
     let(:service) { described_class.new(options) }
     let(:result) { service.execute! }
 
@@ -11,7 +16,7 @@ RSpec.describe CreatePhotoService do
 
       context "((test without db))" do
         before :each do
-          expect_any_instance_of(Photo).to receive(:save).and_return(true)
+          expect_any_instance_of(asset_type).to receive(:save).and_return(true)
         end
 
         it "returns a successful service result" do
@@ -19,7 +24,7 @@ RSpec.describe CreatePhotoService do
         end
 
         it "returns the model in the :photo service property" do
-          expect(result[:photo]).to be_a(Photo)
+          expect(result[asset_type_name]).to be_a(asset_type)
         end
       end
 
@@ -28,7 +33,7 @@ RSpec.describe CreatePhotoService do
 
         it "recalculates the average date for the album" do
           expect(AverageDateUpdaterService).to receive(:invoke).with(album_id: album.id).exactly(:once)
-          options[:photo][:album_id] = album.id
+          options[asset_type_name][:album_id] = album.id
 
           service.execute!
         end
@@ -40,8 +45,8 @@ RSpec.describe CreatePhotoService do
       let(:errors) { {base: ["some error"]} }
 
       before :each do
-        expect_any_instance_of(Photo).to receive(:save).and_return(false)
-        expect_any_instance_of(Photo).to receive(:errors).and_return(errors)
+        expect_any_instance_of(asset_type).to receive(:save).and_return(false)
+        expect_any_instance_of(asset_type).to receive(:errors).and_return(errors)
       end
 
       it "returns an unsuccessful service result" do
@@ -58,14 +63,19 @@ RSpec.describe CreatePhotoService do
       let(:options) { basic_options }
 
       before :each do
-        expect_any_instance_of(Photo).to receive(:album).at_least(:once).and_return(album)
+        expect_any_instance_of(asset_type).to receive(:album).at_least(:once).and_return(album)
         expect(album).to receive(:full?).and_return(true)
       end
 
       it "does not allow photos to be created for albums that are full" do
-        options[:photo][:album_id] = album.id
+        options[asset_type_name][:album_id] = album.id
         expect(result.errors[:album]).not_to be_nil
       end
     end
   end
+end
+
+RSpec.describe CreateMediaService do
+  include_examples "media creation for asset type", Photo, "jpg"
+  include_examples "media creation for asset type", Video, "avi"
 end

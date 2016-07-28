@@ -98,7 +98,7 @@ RSpec.describe PhotosController, type: :controller do
           model.id = 1123
           expect(model).to receive(:persisted?).and_return(true)
 
-          expect(CreatePhotoService).to receive(:invoke).and_return(successful_result)
+          expect(CreateMediaService).to receive(:invoke).and_return(successful_result)
         end
 
         it "returns status 201 created" do
@@ -129,7 +129,7 @@ RSpec.describe PhotosController, type: :controller do
         end
 
         before :each do
-          expect(CreatePhotoService).to receive(:invoke).and_return(unsuccessful_result)
+          expect(CreateMediaService).to receive(:invoke).and_return(unsuccessful_result)
         end
 
         it "returns 422 status code" do
@@ -149,7 +149,7 @@ RSpec.describe PhotosController, type: :controller do
 
       before :each do
         expect(CreateMultiplePhotosService).to receive(:invoke).and_return(service_result)
-        expect(CreatePhotoService).not_to receive(:invoke)
+        expect(CreateMediaService).not_to receive(:invoke)
       end
 
       context "for a valid request" do
