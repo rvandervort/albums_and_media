@@ -11,19 +11,41 @@ RSpec.describe "Routing" , type: :routing do
 
   end
 
-  describe "for photos as a top-level resource" do
-    it "does not route POST /photos" do 
-      expect(post("/photos")).not_to be_routable
+  describe "for photos" do
+    describe "as a top-level resources" do
+      it "does not route POST /photos" do 
+        expect(post("/photos")).not_to be_routable
+      end
+
+      it { expect(put("/photos/1")).to route_to(controller: "photos", action: "update", id: "1") }
+      it { expect(delete("/photos/1")).to route_to(controller: "photos", action: "destroy", id: "1") }
     end
 
-    it { expect(put("/photos/1")).to route_to(controller: "photos", action: "update", id: "1") }
-    it { expect(delete("/photos/1")).to route_to(controller: "photos", action: "destroy", id: "1") }
+    describe "for photos as a nested resource" do
+      it { expect(get("/albums/123/photos")).to route_to(controller: "photos", action: "index", album_id: "123"
+      ) }
+
+      it { expect(post("/albums/123/photos")).to route_to(controller: "photos", action: "create", album_id: "123")}
+    end
   end
 
-  describe "for photos as a nested resource" do
-    it { expect(get("/albums/123/photos")).to route_to(controller: "photos", action: "index", album_id: "123"
-    ) }
+  describe "for videos" do
+    describe "as a top-level resources" do
+      it "does not route POST /videos" do 
+        expect(post("/videos")).not_to be_routable
+      end
 
-    it { expect(post("/albums/123/photos")).to route_to(controller: "photos", action: "create", album_id: "123")}
+      it { expect(put("/videos/1")).to route_to(controller: "videos", action: "update", id: "1") }
+      it { expect(delete("/videos/1")).to route_to(controller: "videos", action: "destroy", id: "1") }
+    end
+
+    describe "for videos as a nested resource" do
+      it { expect(get("/albums/123/videos")).to route_to(controller: "videos", action: "index", album_id: "123"
+      ) }
+
+      it { expect(post("/albums/123/videos")).to route_to(controller: "videos", action: "create", album_id: "123")}
+    end
   end
+
+
 end
