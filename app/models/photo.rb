@@ -1,5 +1,5 @@
 class Photo < ActiveRecord::Base
-  belongs_to :album, {touch: true, counter_cache: true}
+  belongs_to :album, {inverse_of: :photos, touch: true, counter_cache: true}
 
   include ActiveModel::Validations
 

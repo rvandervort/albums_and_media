@@ -1,7 +1,7 @@
 class Album < ActiveRecord::Base
   include ActiveModel::Validations
 
-  has_many :photos, dependent: :destroy
+  has_many :photos, inverse_of: :album, dependent: :destroy
 
   validates_with NameValidator, PositionValidator
 
