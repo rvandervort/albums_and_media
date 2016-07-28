@@ -8,7 +8,7 @@ class CreatePhotoService < ServiceBase
       result.success = true
       result[:photo] = photo
 
-      update_album_average_date(photo.album)
+      AverageDateUpdaterService.invoke(album_id: photo.album_id)
     else
       result.success = false
       result[:errors] = photo.errors
@@ -22,14 +22,5 @@ class CreatePhotoService < ServiceBase
 
   def attributes
     options.fetch(:photo, {})
-  end
-
-  def update_album_average_date(album)
-    times = album.photos.pluck(:taken_at).map(&:to_i)
-
-    average_time = Time.zone.at((times.reduce(:+) / times.count).to_i)
-
-    album.average_date = average_time.to_date
-    album.save
   end
 end

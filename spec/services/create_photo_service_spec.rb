@@ -12,7 +12,6 @@ RSpec.describe CreatePhotoService do
       context "((test without db))" do
         before :each do
           expect_any_instance_of(Photo).to receive(:save).and_return(true)
-          expect(service).to receive(:update_album_average_date)
         end
 
         it "returns a successful service result" do
@@ -26,12 +25,12 @@ RSpec.describe CreatePhotoService do
 
       context "(( test with db ))", :db => true do
         let(:album) { Album.create(name: "Test Album", position: 1) }
+
         it "recalculates the average date for the album" do
+          expect(AverageDateUpdaterService).to receive(:invoke).with(album_id: album.id).exactly(:once)
           options[:photo][:album_id] = album.id
 
-          photo = result[:photo]
-         
-          expect(photo.album.average_date).to eq(photo.taken_at.to_date)
+          service.execute!
         end
       end
     end
