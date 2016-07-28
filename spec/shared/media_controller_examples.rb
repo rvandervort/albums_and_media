@@ -5,12 +5,12 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
   let(:plural_asset_type_name) { "#{asset_type_name}".pluralize.to_sym }
 
   let(:media_service_base_name) { "#{asset_type.name.capitalize}Service" }
-  let(:get_media_service) { "Get#{asset_type.name.pluralize.capitalize}Service".constantize }
-  let(:create_multiple_media_service) { "CreateMultiple#{asset_type.name.pluralize.capitalize}Service".constantize }
-  let(:fetch_media_service) { "Fetch#{media_service_base_name}".constantize }
+  let(:get_media_service) { GetMediaService }
+  let(:create_multiple_media_service) { CreateMultipleMediaService }
+  let(:fetch_media_service) { FetchMediaService }
   let(:create_media_service) { CreateMediaService }
-  let(:destroy_media_service) { "Destroy#{media_service_base_name}".constantize }
-  let(:update_media_service) { "Update#{media_service_base_name}".constantize }
+  let(:destroy_media_service) { DestroyMediaService }
+  let(:update_media_service) { UpdateMediaService }
 
   describe '#index' do
     let(:base_request_attributes) { {format: 'json'} }

@@ -4,7 +4,7 @@ class PhotosController < ApplicationController
   def index
     respond_to do |format|
       format.json do
-        result = GetPhotosService.invoke(page_number: params[:page], album_id: params[:album_id])
+        result = GetMediaService.invoke(page_number: params[:page], album_id: params[:album_id])
         if result.success?
           @photos = result[:photos]
         else
@@ -16,7 +16,7 @@ class PhotosController < ApplicationController
 
   def show
     respond_to do |format|
-      result = FetchPhotoService.invoke(id: params[:id])
+      result = FetchMediaService.invoke(media_type: Photo, id: params[:id])
 
       format.json do
         if result.success?
@@ -41,7 +41,7 @@ class PhotosController < ApplicationController
 
 
   def update
-    result = UpdatePhotoService.invoke({id: params[:id], photo: update_params})
+    result = UpdateMediaService.invoke({media_type: Photo, id: params[:id], photo: update_params})
 
     respond_to do |format|
       format.json do
@@ -56,7 +56,7 @@ class PhotosController < ApplicationController
   end
 
   def destroy
-    result = DestroyPhotoService.invoke(id: params[:id])
+    result = DestroyMediaService.invoke(media_type: Photo, id: params[:id])
 
     respond_to do |format|
       format.json do
@@ -96,7 +96,7 @@ class PhotosController < ApplicationController
   end
 
   def create_multiple
-    result = CreateMultiplePhotosService.invoke(params)
+    result = CreateMultipleMediaService.invoke(params)
 
     respond_to do |format|
       format.json do

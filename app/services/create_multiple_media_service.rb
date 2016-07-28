@@ -1,19 +1,19 @@
-class CreateMultiplePhotosService < ServiceBase
+class CreateMultipleMediaService < ServiceBase
   def execute!
     result = ServiceResult.new
 
-    validate_and_build_photos
+    validate_and_build_media
 
     if all_attributes_are_valid?
-      photo_records.each(&:save)
+      media_records.each(&:save)
 
       result.success = true
-      result[:photos] = photo_records
+      result[plural_media_type_name] = media_records
 
       AverageDateUpdaterService.invoke(album_id: album_id)
     else
       result.success = false
-      result[:attributes_and_errors] = photo_attribute_set
+      result[:attributes_and_errors] = media_attribute_set
     end
 
     result
@@ -21,22 +21,22 @@ class CreateMultiplePhotosService < ServiceBase
 
   private
 
-  attr_accessor :photo_records
+  attr_accessor :media_records
 
-  def validate_and_build_photos
-    @photo_records = []
+  def validate_and_build_media
+    @media_records = []
     @all_records_valid = true
 
-    photo_attribute_set.each do |attributes|
+    media_attribute_set.each do |attributes|
       if !attributes[:album_id].blank? && attributes[:album_id] != album_id
         attributes[:errors] = {album: "All records must be for album #{album_id}"}
         @all_records_valid = false
       else
-        photo = Photo.new(params_with_whitelist(attributes))
-        @photo_records << photo
+        model = media_type.new(params_with_whitelist(attributes))
+        @media_records << model
 
-        unless photo.valid?
-          attributes[:errors] = photo.errors
+        unless model.valid?
+          attributes[:errors] = model.errors
           @all_records_valid = false
         end
       end
@@ -47,8 +47,8 @@ class CreateMultiplePhotosService < ServiceBase
     @all_records_valid == true
   end
 
-  def photo_attribute_set
-    @photo_attribute_set ||= options.fetch(:photos, [])
+  def media_attribute_set
+    @media_attribute_set ||= options.fetch(plural_media_type_name, [])
   end
 
   def params_with_whitelist(a)
@@ -65,5 +65,17 @@ class CreateMultiplePhotosService < ServiceBase
 
   def album_id
     options[:album_id]
+  end
+
+  def media_type
+    options.fetch(:media_type, Photo)
+  end
+
+  def media_type_name
+    media_type.name.downcase.to_sym
+  end
+
+  def plural_media_type_name
+    media_type_name.to_s.pluralize.to_sym
   end
 end

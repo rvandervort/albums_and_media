@@ -4,9 +4,9 @@ class VideosController < ApplicationController
   def index
     respond_to do |format|
       format.json do
-        result = GetPhotosService.invoke(page_number: params[:page], album_id: params[:album_id])
+        result = GetMediaService.invoke(media_type: Video, page_number: params[:page], album_id: params[:album_id])
         if result.success?
-          @photos = result[:photos]
+          @videos = result[:videos]
         else
           render nothing: true, status: :unprocessable_entity
         end
@@ -16,11 +16,11 @@ class VideosController < ApplicationController
 
   def show
     respond_to do |format|
-      result = FetchPhotoService.invoke(id: params[:id])
+      result = FetchMediaService.invoke(media_type: Video, id: params[:id])
 
       format.json do
         if result.success?
-          @photo = result[:photo]
+          @video = result[:video]
         else
           render nothing: true, status: :not_found
         end
@@ -29,9 +29,9 @@ class VideosController < ApplicationController
   end
 
   def create
-    if create_single_photo?
+    if create_single_video?
       create_single
-    elsif create_multiple_photos?
+    elsif create_multiple_videos?
       create_multiple
     else
       render nothing: true, status: :unprocessable_entity
@@ -41,7 +41,7 @@ class VideosController < ApplicationController
 
 
   def update
-    result = UpdatePhotoService.invoke({id: params[:id], photo: update_params})
+    result = UpdateMediaService.invoke({media_type: Video, id: params[:id], video: update_params})
 
     respond_to do |format|
       format.json do
@@ -56,14 +56,14 @@ class VideosController < ApplicationController
   end
 
   def destroy
-    result = DestroyPhotoService.invoke(id: params[:id])
+    result = DestroyMediaService.invoke(media_type: Video, id: params[:id])
 
     respond_to do |format|
       format.json do
         if result.success?
           render nothing: true, status: :no_content
         else
-          if result[:photo_not_found]
+          if result[:video_not_found]
             render nothing: true, status: :not_found
           else
             @errors = result.errors
@@ -77,14 +77,14 @@ class VideosController < ApplicationController
   private
 
   def create_single
-    result = CreatePhotoService.invoke(photo: create_params.merge(album_id: params[:album_id]))
+    result = CreateMediaService.invoke(media_type: Video, video: create_params.merge(album_id: params[:album_id]))
 
     respond_to do |format|
       format.json do
         if result.success?
-          @photo = result[:photo]
+          @video = result[:video]
 
-          response.headers["Location"] = view_context.url_for(@photo)
+          response.headers["Location"] = view_context.url_for(@video)
 
           render :show, status: :created
         else
@@ -96,34 +96,34 @@ class VideosController < ApplicationController
   end
 
   def create_multiple
-    result = CreateMultiplePhotosService.invoke(params)
+    result = CreateMultipleMediaService.invoke(params.merge(media_type: Video))
 
     respond_to do |format|
       format.json do
         if result.success?
-          @photos = result[:photos]
-          render 'photos/multiple', status: :created
+          @videos = result[:videos]
+          render 'videos/multiple', status: :created
         else
-          @photos = result[:attributes_and_errors]
-          render 'photos/multiple', status: :unprocessable_entity
+          @videos = result[:attributes_and_errors]
+          render 'videos/multiple', status: :unprocessable_entity
         end
       end
     end
   end
 
-  def create_single_photo?
-    params.has_key?(:photo) && !params.has_key?(:photos)
+  def create_single_video?
+    params.has_key?(:video) && !params.has_key?(:videos)
   end
 
-  def create_multiple_photos?
-    params.has_key?(:photos)
+  def create_multiple_videos?
+    params.has_key?(:videos)
   end
 
   def create_params
-    params.require(:photo).permit(:album_id, :name, :position, :description, :url, :taken_at)
+    params.require(:video).permit(:album_id, :name, :position, :description, :url, :taken_at)
   end
 
   def update_params
-    params.require(:photo).permit(:album_id, :name, :position, :description, :url, :taken_at)
+    params.require(:video).permit(:album_id, :name, :position, :description, :url, :taken_at)
   end
 end

@@ -11,7 +11,7 @@ RSpec.describe FetchAlbumService do
       before :each do
         expect(Album).to receive(:find).and_return(model)
       end
-      
+
       it "returns a successful service result, if the record was found" do
         expect(result.success?).to be_truthy
       end
@@ -22,6 +22,7 @@ RSpec.describe FetchAlbumService do
 
       context "and the associated photos are desired" do
         let(:photos) { double() }
+
         let(:result_with_photos) {
           ServiceResult.new.tap do |result|
             result.success = true
@@ -30,7 +31,7 @@ RSpec.describe FetchAlbumService do
         }
 
         before :each do
-          expect(GetPhotosService).to receive(:invoke).and_return(result_with_photos)
+          expect(GetMediaService).to receive(:invoke).and_return(result_with_photos)
         end
 
         it "sets the :photos property" do
@@ -39,12 +40,37 @@ RSpec.describe FetchAlbumService do
         end
       end
 
-      context "and the associted photos are not desired" do
+      context "and the associated photos are not desired" do
         it "does not set the photos property" do
           expect(result[:photos]).to be_nil
         end
       end
 
+      context "and the associated videos are desired" do
+        let(:videos) { double() }
+
+        let(:result_with_videos) {
+          ServiceResult.new.tap do |result|
+            result.success = true
+            result[:videos] = videos
+          end
+        }
+
+        before :each do
+          expect(GetMediaService).to receive(:invoke).and_return(result_with_videos)
+        end
+
+        it "sets the :videos property" do
+          options[:with_videos] = true
+          expect(result[:videos]).to eq(videos)
+        end
+      end
+
+      context "and the associated videos are not desired" do
+        it "does not set the videos property" do
+          expect(result[:videos]).to be_nil
+        end
+      end
     end
 
     context "when the album is not found" do
