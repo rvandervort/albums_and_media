@@ -32,7 +32,7 @@ class AverageDateUpdaterService < ServiceBase
   end
 
   def times
-    album.photos.pluck(:taken_at).map(&:to_i)
+    [album.photos.pluck(:taken_at), album.videos.pluck(:taken_at)].flatten.map(&:to_i)
   end
 
   def album_id
