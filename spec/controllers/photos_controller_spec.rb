@@ -194,4 +194,48 @@ RSpec.describe PhotosController, type: :controller do
 
     end
   end
+
+  describe '#destroy' do
+    let(:base_request_attributes) { {format: 'json'} }
+    let(:request_attributes) { base_request_attributes.merge({id: 1}) }
+    let(:successful_result) {
+      ServiceResult.new.tap do |result|
+        result.success = true
+      end
+    }
+
+    let(:unsuccessful_result) do
+      ServiceResult.new.tap do |result|
+        result.success = false
+        result.errors[:base] = ["Unknown error"]
+      end
+    end
+
+    let(:photo_doesnt_exist_result) {
+      ServiceResult.new.tap do |result|
+        result.success = false
+        result.errors[:base] = ["Photo does not exist"]
+        result[:photo_not_found] = true
+      end
+    }
+
+    it "returns 204, no content if successful" do
+      expect(DestroyPhotoService).to receive(:invoke).and_return(successful_result)
+
+      delete :destroy, request_attributes
+      expect(response).to have_http_status(:no_content)
+    end
+
+    it "returns a 404 if the photo doesn't exist" do
+      expect(DestroyPhotoService).to receive(:invoke).and_return(photo_doesnt_exist_result)
+      delete :destroy, request_attributes
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns a 422, unprocessable_entity if other errors occurred" do
+      expect(DestroyPhotoService).to receive(:invoke).and_return(unsuccessful_result)
+      delete :destroy, request_attributes
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
 end

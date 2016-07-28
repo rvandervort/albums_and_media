@@ -62,6 +62,25 @@ class PhotosController < ApplicationController
     end
   end
 
+  def destroy
+    result = DestroyPhotoService.invoke(id: params[:id])
+
+    respond_to do |format|
+      format.json do
+        if result.success?
+          render nothing: true, status: :no_content
+        else
+          if result[:photo_not_found]
+            render nothing: true, status: :not_found
+          else
+            @errors = result.errors
+            render 'shared/errors', status: :unprocessable_entity
+          end
+        end
+      end
+    end
+  end
+
   private
 
   def create_params
