@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe DestroyPhotoService, :db => true do
   let(:album) { Album.create(name: "Test Album", position: 1) }
-  let(:photo) { Photo.create(url: "http://test.jpg", album_id: album.id) }
+  let(:photo) { Photo.create(name: "Photo", url: "http://test.jpg", album_id: album.id) }
 
   let(:options) { {id: photo.id } }
   let(:service) { described_class.new(options) }

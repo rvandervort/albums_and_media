@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe UpdatePhotoService do
   describe '#execute', :db => true do
-    let(:model) { Photo.create(url: "https://sdfsdf.jpg", album_id: old_album.id) }
+    let(:model) { Photo.create(name: "Photo", url: "https://sdfsdf.jpg", album_id: old_album.id) }
     let(:old_album) { Album.create(name: "Test Album", position: 1) }
     let(:new_album) { Album.create(name: "Test Album 2", position: 2) }
 
@@ -10,7 +10,7 @@ RSpec.describe UpdatePhotoService do
 
     let(:service) { described_class.new(options) }
     let(:result) { service.execute! }
-    
+
     context "with an invalid record ID" do
       let(:options) { base_options }
       it "returns an unsuccessful result if the photo does not exist" do
@@ -37,7 +37,7 @@ RSpec.describe UpdatePhotoService do
           expect(AverageDateUpdaterService).to receive(:invoke).exactly(:once).with(id: old_album.id)
           expect(AverageDateUpdaterService).to receive(:invoke).exactly(:once).with(id: new_album.id)
 
-          service.execute! 
+          service.execute!
 
           expect(model.reload.album_id).to eq(new_album.id)
         end

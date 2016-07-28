@@ -9,7 +9,7 @@ describe GetPhotosService do
 
     let(:photos) {
       20.times.map do |i|
-        album.photos << Photo.create(url: "http://,jpg")
+        album.photos << Photo.create(name: "Photo", url: "http://,jpg")
       end
     }
 
