@@ -1,18 +1,18 @@
 class AlbumFullValidator < ActiveModel::Validator
   def validate(record)
-    @photo = record
+    @the_record = record
 
     if album_exists_and_is_full?
-      photo.errors.add(:album, "Album #{record.album_id} is full (max: #{Album.max_photos}")
+      the_record.errors.add(:album, "Album #{record.album_id} is full (max: #{Album.max_media}")
     end
   end
 
   private
 
-  attr_reader :photo
+  attr_reader :the_record
 
   def album
-    photo.album
+    the_record.album
   end
 
   def album_exists_and_is_full?

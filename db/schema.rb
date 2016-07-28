@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160726170107) do
+ActiveRecord::Schema.define(version: 20160728143601) do
 
   create_table "albums", force: :cascade do |t|
     t.string   "name"
@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(version: 20160726170107) do
     t.datetime "created_at",               null: false
     t.datetime "updated_at",               null: false
     t.integer  "photos_count", default: 0
+    t.integer  "videos_count", default: 0
   end
 
   add_index "albums", ["position"], name: "index_albums_on_position"
@@ -35,5 +36,17 @@ ActiveRecord::Schema.define(version: 20160726170107) do
   end
 
   add_index "photos", ["album_id"], name: "index_photos_on_album_id"
+
+  create_table "videos", force: :cascade do |t|
+    t.integer  "album_id"
+    t.string   "name"
+    t.text     "description"
+    t.string   "url"
+    t.datetime "taken_at"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "videos", ["album_id"], name: "index_videos_on_album_id"
 
 end
