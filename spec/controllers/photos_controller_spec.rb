@@ -142,4 +142,56 @@ RSpec.describe PhotosController, type: :controller do
       end
     end
   end
+
+  describe '#update' do
+    let(:base_request_attributes) { {id: "1123", format: 'json'} }
+
+    context 'for a valid request, with valid data' do
+      let(:valid_photo_attributes) { {url: "http://sdf.jpg", name: "My brand new photo"} }
+      let(:model) { Photo.new(valid_photo_attributes) }
+      let(:successful_result) do
+        ServiceResult.new.tap do |result|
+          result.success = true
+          result[:photo] = model
+        end
+      end
+
+      before :each do
+        expect(UpdatePhotoService).to receive(:invoke).and_return(successful_result)
+      end
+
+      it "returns http status 200 OK" do
+        put :update, base_request_attributes.merge(:photo => valid_photo_attributes)
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context 'for an valid request, with invalid data' do
+      let(:valid_photo_attributes) { {name: "My brand new photo"} }
+      let(:model) { Photo.new(valid_photo_attributes) }
+      let(:errors) { double() }
+
+      let(:unsuccessful_result) do
+        ServiceResult.new.tap do |result|
+          result.success = false
+          result[:errors] = errors
+        end
+      end
+
+      before :each do
+        expect(UpdatePhotoService).to receive(:invoke).and_return(unsuccessful_result)
+      end
+
+      it "returns a 422 unprocessable entity" do
+        put :update, base_request_attributes.merge(:photo => valid_photo_attributes)
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "assigns the @errors" do
+        put :update, base_request_attributes.merge(:photo => valid_photo_attributes)
+        expect(assigns(:errors)).to eq(errors)
+      end
+
+    end
+  end
 end

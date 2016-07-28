@@ -47,9 +47,28 @@ class PhotosController < ApplicationController
     end
   end
 
+  def update
+    result = UpdatePhotoService.invoke({id: params[:id], photo: update_params})
+
+    respond_to do |format|
+      format.json do
+        if result.success?
+          render nothing: true, status: :ok
+        else
+          @errors = result.errors
+          render 'shared/errors', status: :unprocessable_entity
+        end
+      end
+    end
+  end
+
   private
 
   def create_params
+    params.require(:photo).permit(:album_id, :name, :position, :description, :url, :taken_at)
+  end
+
+  def update_params
     params.require(:photo).permit(:album_id, :name, :position, :description, :url, :taken_at)
   end
 end
