@@ -1,7 +1,7 @@
-class UpdatePhotoService < ServiceBase
+class UpdateMediaService < ServiceBase
   def execute!
-    if photo_record
-      update_photo
+    if asset_record
+      update_asset
     else
       invalid_record
     end
@@ -9,19 +9,19 @@ class UpdatePhotoService < ServiceBase
 
   private
 
-  def update_photo
+  def update_asset
     result = ServiceResult.new
 
-    old_album_id = photo_record.album_id
+    old_album_id = asset_record.album_id
 
-    if photo_record.update(attributes)
+    if asset_record.update(attributes)
       result.success = true
-      result[:photo] = photo_record
+      result[media_class_name] = asset_record
 
       update_average_dates(old_album_id, attributes[:album_id])
     else
       result.success = false
-      result[:errors] = photo_record.errors
+      result[:errors] = asset_record.errors
     end
 
     result
@@ -39,7 +39,7 @@ class UpdatePhotoService < ServiceBase
   def invalid_record
     ServiceResult.new.tap do |result|
       result.success = false
-      result.errors[:base] = ["Photo with id #{id} not found"]
+      result.errors[:base] = ["#{media_class.name} with id #{id} not found"]
     end
   end
 
@@ -49,15 +49,24 @@ class UpdatePhotoService < ServiceBase
   end
 
   def attributes
-    options.fetch(:photo, {})
+    options.fetch(media_class_name, {})
   end
 
-  def photo_record
-    @photo ||= retrieve_photo
+  def asset_record
+    @asset ||= retrieve_asset
   end
 
-  def retrieve_photo
-    result = FetchPhotoService.invoke({id: id})
-    result.success? ? result[:photo] : nil
+  def retrieve_asset
+    result = FetchMediaService.invoke(media_type: media_class, id: id)
+    result.success? ? result[media_class_name] : nil
+  end
+
+  def media_class
+    options.fetch(:media_class, Photo)
+  end
+
+  def media_class_name
+    media_class.name.downcase.to_sym
   end
 end
+  
