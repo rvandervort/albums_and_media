@@ -12,7 +12,7 @@ class Album < ActiveRecord::Base
   end
 
   def current_media_count
-    photos_count + videos_count
+    (photos_count.nil? ? 0 : photos_count) + (photos_count.nil? ? 0 : photos_count)
   end
 
   def full?
