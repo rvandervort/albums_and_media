@@ -48,6 +48,11 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
         get :index, request_attributes
         expect(assigns(plural_asset_type_name)).to eq(records)
       end
+
+      it "renders the index template" do
+        get :index, request_attributes
+        expect(response).to render_template(:index)
+      end
     end
   end
 
@@ -68,23 +73,38 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
       end
     }
 
+    context "when the asset is found" do
+      it 'responds with a 200' do
+        expect(fetch_media_service).to receive(:invoke).and_return(successful_result)
+        get :show, base_request_attributes.merge(:id => 1)
+        expect(response).to have_http_status(:ok)
+      end
 
-    it 'responds with a 200, if the asset is found' do
-      expect(fetch_media_service).to receive(:invoke).and_return(successful_result)
-      get :show, base_request_attributes.merge(:id => 1)
-      expect(response).to have_http_status(:ok)
+      it "sets the asset" do
+        expect(fetch_media_service).to receive(:invoke).and_return(successful_result)
+        get :show, base_request_attributes.merge(:id => 1)
+        expect(assigns(asset_type_name)).to eq(model)
+      end
+
+      it "renders the show template" do
+        expect(fetch_media_service).to receive(:invoke).and_return(successful_result)
+        get :show, base_request_attributes.merge(:id => 1)
+        expect(response).to render_template(:show)
+      end
     end
 
-    it "sets the asset, if is found" do
-      expect(fetch_media_service).to receive(:invoke).and_return(successful_result)
-      get :show, base_request_attributes.merge(:id => 1)
-      expect(assigns(asset_type_name)).to eq(model)
-    end
+    context "when the asset is not found" do
+      it "responds with a 404" do
+        expect(fetch_media_service).to receive(:invoke).and_return(unsuccessful_result)
+        get :show, base_request_attributes.merge(:id => 1)
+        expect(response).to have_http_status(:not_found)
+      end
 
-    it "responds with a 404, if the asset is not found" do
-      expect(fetch_media_service).to receive(:invoke).and_return(unsuccessful_result)
-      get :show, base_request_attributes.merge(:id => 1)
-      expect(response).to have_http_status(:not_found)
+      it "does not render the show template" do
+        expect(fetch_media_service).to receive(:invoke).and_return(unsuccessful_result)
+        get :show, base_request_attributes.merge(:id => 1)
+        expect(response).not_to render_template(:show)
+      end
     end
   end
 
@@ -126,6 +146,11 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
           post :create, base_request_attributes.merge("#{asset_type_name}".to_sym => valid_attributes)
           expect(response.headers["Location"]).to match("#{plural_asset_type_name}/1123")
         end
+
+        it "renders the show template" do
+          post :create, base_request_attributes.merge("#{asset_type_name}".to_sym => valid_attributes)
+          expect(response).to render_template(:show)
+        end
       end
 
       context "for an invalid request" do
@@ -151,6 +176,12 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
         it "assigns the list of errors" do
           post :create, base_request_attributes.merge("#{asset_type_name}".to_sym => invalid_attributes)
           expect(assigns(:errors)).to eq(errors)
+        end
+
+        it "renders the errors template" do
+          post :create, base_request_attributes.merge("#{asset_type_name}".to_sym => invalid_attributes)
+
+          expect(response).to render_template("shared/errors")
         end
       end
     end
@@ -180,6 +211,11 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
           post :create, base_request_attributes.merge("#{plural_asset_type_name}".to_sym => media_list)
           expect(assigns(plural_asset_type_name)).to eq(media_list)
         end
+
+        it "renders the :asset_type/multiple template" do
+          post :create, base_request_attributes.merge("#{plural_asset_type_name}".to_sym => media_list)
+          expect(response).to render_template("#{plural_asset_type_name}/multiple")
+        end
       end
 
 
@@ -199,6 +235,12 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
         it "assigns the assets, with errors for each" do
           post :create, base_request_attributes.merge("#{plural_asset_type_name}".to_sym => media_list)
           expect(assigns(plural_asset_type_name)).to eq(service_result[:attributes_and_errors])
+        end
+
+        it "renders the attributes_and_errors template" do
+          post :create, base_request_attributes.merge("#{plural_asset_type_name}".to_sym => media_list)
+
+          expect(response).to render_template("#{plural_asset_type_name}/attributes_and_errors")
         end
       end
     end
@@ -254,6 +296,12 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
         expect(assigns(:errors)).to eq(errors)
       end
 
+
+      it "renders the shared/errors template" do
+        put :update, base_request_attributes.merge(asset_type_name => valid_attributes)
+        expect(response).to render_template("shared/errors")
+      end
+
     end
   end
 
@@ -298,6 +346,12 @@ RSpec.shared_examples "A media controller for asset type" do |asset_type, valid_
       expect(destroy_media_service).to receive(:invoke).and_return(unsuccessful_result)
       delete :destroy, request_attributes
       expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "renders the shared/errors template if errors occurred" do
+      expect(destroy_media_service).to receive(:invoke).and_return(unsuccessful_result)
+      delete :destroy, request_attributes
+      expect(response).to render_template("shared/errors")
     end
   end
 end

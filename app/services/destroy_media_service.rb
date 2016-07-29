@@ -11,10 +11,11 @@ class DestroyMediaService < ServiceBase
 
   def destroy_asset
     ServiceResult.new.tap do |result|
+      album_ids = asset.albums.pluck(:id)
+
       if asset.destroy
         result.success = true
-        AverageDateUpdaterService.invoke(album_id: asset.album_id)
-
+        album_ids.each { |id| AverageDateUpdaterService.invoke(album_id: id) }
       else
         basic_error(result, true)
       end

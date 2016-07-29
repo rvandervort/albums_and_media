@@ -10,6 +10,11 @@ RSpec.describe AlbumsController, type: :controller do
           get :index, base_request_attributes.merge('page' => page_number)
           expect(response).to have_http_status(:unprocessable_entity)
         end
+
+        it "renders no template" do
+          get :index, base_request_attributes.merge('page' => page_number)
+          expect(response).to_not render_template(:index)
+        end
       end
     end
 
@@ -25,6 +30,11 @@ RSpec.describe AlbumsController, type: :controller do
         get :index, request_attributes
         expect(assigns(:albums)).to be_a(Album::ActiveRecord_Relation)
       end
+
+      it "renders the index template" do
+        get :index, request_attributes
+        expect(response).to render_template(:index)
+      end
     end
   end
 
@@ -32,12 +42,14 @@ RSpec.describe AlbumsController, type: :controller do
     let(:base_request_attributes) { {format: 'json'} }
     let(:model) { Album.new(name: 'test album') }
     let(:photos) { 3.times.map { |i| Photo.new(name: "Photo") } }
+    let(:videos) { 3.times.map { |i| Video.new(name: "Photo") } }
 
     let(:successful_result) {
       ServiceResult.new.tap do |result|
         result.success = true
         result[:album] = model
         result[:photos] = photos
+        result[:videos] = videos
       end
     }
 
@@ -66,10 +78,28 @@ RSpec.describe AlbumsController, type: :controller do
       expect(assigns(:photos)).to eq(photos)
     end
 
+    it 'sets the videos, if the album was found' do
+      expect(FetchAlbumService).to receive(:invoke).and_return(successful_result)
+      get :show, base_request_attributes.merge(:id => 1)
+      expect(assigns(:videos)).to eq(videos)
+    end
+
+    it 'renders the show template, if the album was found' do
+      expect(FetchAlbumService).to receive(:invoke).and_return(successful_result)
+      get :show, base_request_attributes.merge(:id => 1)
+      expect(response).to render_template(:show)
+    end
+
     it 'responds with a 404, if the album is not found' do
       expect(FetchAlbumService).to receive(:invoke).and_return(unsuccessful_result)
       get :show, base_request_attributes.merge(:id => 1)
       expect(response).to have_http_status(:not_found)
+    end
+
+    it 'does not render the show template if the album is not found' do
+      expect(FetchAlbumService).to receive(:invoke).and_return(unsuccessful_result)
+      get :show, base_request_attributes.merge(:id => 1)
+      expect(response).not_to render_template(:show)
     end
   end
 
@@ -109,6 +139,11 @@ RSpec.describe AlbumsController, type: :controller do
         post :create, base_request_attributes.merge(:album => valid_album_attributes)
         expect(response.headers["Location"]).to match(/albums\/1123/)
       end
+
+      it "renders the :show template" do
+        post :create, base_request_attributes.merge(:album => valid_album_attributes)
+        expect(response).to render_template(:show)
+      end
     end
 
     context "for an invalid request" do
@@ -135,6 +170,11 @@ RSpec.describe AlbumsController, type: :controller do
         post :create, base_request_attributes.merge(:album => invalid_album_attributes)
         expect(assigns(:errors)).to eq(errors)
       end
+
+      it "renders the errors template" do
+        post :create, base_request_attributes.merge(:album => invalid_album_attributes)
+        expect(response).to render_template("shared/errors")
+      end
     end
   end
 
@@ -159,6 +199,7 @@ RSpec.describe AlbumsController, type: :controller do
         put :update, base_request_attributes.merge(:album => valid_album_attributes)
         expect(response).to have_http_status(:ok)
       end
+
     end
 
     context 'for an valid request, with invalid data' do
@@ -185,6 +226,11 @@ RSpec.describe AlbumsController, type: :controller do
       it "assigns the @errors" do
         put :update, base_request_attributes.merge(:album => valid_album_attributes)
         expect(assigns(:errors)).to eq(errors)
+      end
+
+      it "renders the errors template" do
+        put :update, base_request_attributes.merge(:album => valid_album_attributes)
+        expect(response).to render_template("shared/errors")
       end
 
     end
@@ -221,17 +267,33 @@ RSpec.describe AlbumsController, type: :controller do
       expect(response).to have_http_status(:no_content)
     end
 
-    it "returns a 404 if the album doesn't exist" do
-      expect(DestroyAlbumService).to receive(:invoke).and_return(album_doesnt_exist_result)
-      delete :destroy, request_attributes
-      expect(response).to have_http_status(:not_found)
+    context "when the album doesn't exist" do
+      it "returns a 404 if the album doesn't exist" do
+        expect(DestroyAlbumService).to receive(:invoke).and_return(album_doesnt_exist_result)
+        delete :destroy, request_attributes
+        expect(response).to have_http_status(:not_found)
+      end
     end
 
-    it "returns a 422, unprocessable_entity if other errors occurred" do
-      expect(DestroyAlbumService).to receive(:invoke).and_return(unsuccessful_result)
-      delete :destroy, request_attributes
-      expect(response).to have_http_status(:unprocessable_entity)
+
+    context "when the album exists, but can't be deleted" do
+      it "returns a 422, unprocessable_entity if other errors occurred" do
+        expect(DestroyAlbumService).to receive(:invoke).and_return(unsuccessful_result)
+        delete :destroy, request_attributes
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "sets the errors" do
+        expect(DestroyAlbumService).to receive(:invoke).and_return(unsuccessful_result)
+        delete :destroy, request_attributes
+        expect(assigns(:errors)).to eq(unsuccessful_result.errors)
+      end
+
+      it "renders the errors template" do
+        expect(DestroyAlbumService).to receive(:invoke).and_return(unsuccessful_result)
+        delete :destroy, request_attributes
+        expect(response).to render_template("shared/errors")
+      end
     end
   end
-
 end

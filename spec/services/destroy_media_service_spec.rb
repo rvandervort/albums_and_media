@@ -3,7 +3,8 @@ require 'rails_helper'
 RSpec.shared_examples "a media destruction service for asset type" do |asset_type, valid_extension|
 
   let(:album) { Album.create(name: "Test Album", position: 1) }
-  let(:model) { asset_type.create(name: asset_type.name, url: "http://test#{valid_extension}", album_id: album.id) }
+  let(:model) { asset_type.create(name: asset_type.name, url: "http://test#{valid_extension}") }
+  let(:plural_asset_type_name) { asset_type.name.downcase.pluralize.to_sym }
 
   let(:options) { {media_type: asset_type, id: model.id } }
   let(:service) { described_class.new(options) }
@@ -11,6 +12,9 @@ RSpec.shared_examples "a media destruction service for asset type" do |asset_typ
 
   describe '#execute!', :db => true do
     context "when the asset exists" do
+      before :each do
+        ContentList.create(album: album, asset: model)
+      end
       it "returns a successful result" do
         expect(result).to be_success
       end

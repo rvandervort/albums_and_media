@@ -23,9 +23,13 @@ class GetMediaService < ServiceBase
     options[:album_id]
   end
 
+  def album
+    @album ||= Album.find(album_id) rescue nil
+  end
+
   def retrieve_assets
     if for_an_album?
-      media_type.where("album_id = ?", album_id)
+      album.send(plural_media_type_name)
     else
       paginated_results
     end

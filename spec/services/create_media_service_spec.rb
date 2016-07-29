@@ -3,9 +3,10 @@ require 'rails_helper'
 RSpec.shared_examples "media creation for asset type" do |asset_type, file_extension|
   describe '#execute!' do
     let(:asset_type_name) { asset_type.name.downcase.to_sym }
-    let(:asset_attributes) { {url: "http://domain.com/file.#{file_extension}", taken_at: Time.zone.now.to_s, name: "Asset Name", album_id: 1} }
+    let(:album) { Album.create(name: "Test Album", position: 1) }
+    let(:asset_attributes) { {url: "http://domain.com/file.#{file_extension}", taken_at: Time.zone.now.to_s, name: "Asset Name"} }
     let(:basic_options) do
-       { :media_class => asset_type, "#{asset_type_name}".to_sym => asset_attributes}
+       { :media_type => asset_type, "#{asset_type_name}".to_sym => asset_attributes, album_id: album.id}
     end
 
     let(:service) { described_class.new(options) }
@@ -33,11 +34,14 @@ RSpec.shared_examples "media creation for asset type" do |asset_type, file_exten
 
         it "recalculates the average date for the album" do
           expect(AverageDateUpdaterService).to receive(:invoke).with(album_id: album.id).exactly(:once)
-          options[asset_type_name][:album_id] = album.id
+          options[:album_id] = album.id
 
           service.execute!
         end
       end
+
+
+
     end
 
     context "when the data does not pass validations" do
@@ -63,12 +67,11 @@ RSpec.shared_examples "media creation for asset type" do |asset_type, file_exten
       let(:options) { basic_options }
 
       before :each do
-        expect_any_instance_of(asset_type).to receive(:album).at_least(:once).and_return(album)
-        expect(album).to receive(:full?).and_return(true)
+        expect_any_instance_of(Album).to receive(:full?).and_return(true)
       end
 
       it "does not allow photos to be created for albums that are full" do
-        options[asset_type_name][:album_id] = album.id
+        options[:album_id] = album.id
         expect(result.errors[:album]).not_to be_nil
       end
     end

@@ -5,9 +5,7 @@ RSpec.shared_examples "a media update service for asset type" do |asset_type, va
 
     let(:asset_type_name) { asset_type.name.downcase.to_sym }
     
-    let(:model) { asset_type.create(name: asset_type.name, url: "https://sdfsdf.#{valid_file_extension}", album_id: old_album.id) }
-    let(:old_album) { Album.create(name: "Test Album", position: 1) }
-    let(:new_album) { Album.create(name: "Test Album 2", position: 2) }
+    let(:model) { asset_type.create(name: asset_type.name, url: "https://sdfsdf.#{valid_file_extension}") } 
 
     let(:base_options) { {:media_class => asset_type, :id => model.id, asset_type_name => {}} }
 
@@ -25,7 +23,7 @@ RSpec.shared_examples "a media update service for asset type" do |asset_type, va
 
 
     context "with valid asset data" do
-      let(:options) { base_options.merge(asset_type_name => {name: "Test Asset", album_id: new_album.id}) }
+      let(:options) { base_options.merge(asset_type_name => {name: "Test Asset"}) }
 
       it "returns a successful result" do
         expect(result).to be_success
@@ -35,16 +33,6 @@ RSpec.shared_examples "a media update service for asset type" do |asset_type, va
         expect(result[asset_type_name]).to eq(model)
       end
 
-      context "with album changes" do
-        it "recalculates the old album's average_date" do
-          expect(AverageDateUpdaterService).to receive(:invoke).exactly(:once).with(id: old_album.id)
-          expect(AverageDateUpdaterService).to receive(:invoke).exactly(:once).with(id: new_album.id)
-
-          service.execute!
-
-          expect(model.reload.album_id).to eq(new_album.id)
-        end
-      end
     end
 
     context "with invalid data" do

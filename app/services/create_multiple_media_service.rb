@@ -1,58 +1,108 @@
 class CreateMultipleMediaService < ServiceBase
   def execute!
-    result = ServiceResult.new
+    result = validation_chain
 
-    validate_and_build_media
-
-    if all_attributes_are_valid?
-      media_records.each(&:save)
-
-      result.success = true
-      result[plural_media_type_name] = media_records
-
-      AverageDateUpdaterService.invoke(album_id: album_id)
-    else
-      result.success = false
-      result[:attributes_and_errors] = media_attribute_set
-    end
-
-    result
+    result.nil? ? create_media : result
   end
 
   private
 
   attr_accessor :media_records
 
-  def validate_and_build_media
-    @media_records = []
-    @all_records_valid = true
+  def album_id
+    options[:album_id]
+  end
 
-    media_attribute_set.each do |attributes|
-      if !attributes[:album_id].blank? && attributes[:album_id] != album_id
-        attributes[:errors] = {album: "All records must be for album #{album_id}"}
-        @all_records_valid = false
-      else
-        model = media_type.new(params_with_whitelist(attributes))
-        @media_records << model
-
-        unless model.valid?
-          attributes[:errors] = model.errors
-          @all_records_valid = false
-        end
+  def album_exists
+    if album.nil?
+      ServiceResult.new.tap do |result|
+        result.success = false
+        result[:errors] = {album: ["Album with id #{album_id} does not exist"] }
       end
     end
   end
 
-  def all_attributes_are_valid?
-    @all_records_valid == true
+  def album
+    @album ||= begin
+                result = FetchAlbumService.invoke(id: album_id)
+                result.success? ? result[:album] : nil
+               end
+  end
+
+  def album_is_full
+    if album.full?
+      ServiceResult.new.tap do |result|
+        result.success = false
+        result[:errors] = {album: ["Album with id #{album_id} is full"] }
+      end
+    end
+  end
+
+  def album_will_be_full
+    if album.will_be_full_by_adding?(media_attribute_set.count)
+      ServiceResult.new.tap do |result|
+        result.success = false
+        result[:errors] = {album: ["Album with id #{album_id} will be full by adding these media"] }
+      end
+    end
+  end
+
+  def validation_chain
+    [:album_exists, :album_is_full, :album_will_be_full, :build_and_validate_records].each do |validation_method|
+      result = self.send(validation_method)
+      unless result.nil?
+        return result
+      end
+    end
+
+    nil
+  end
+
+  def build_and_validate_records
+    @media_records = []
+    @all_records_valid = true
+
+    media_attribute_set.each do |attrs|
+      model = media_type.new(params_with_whitelist(attrs))
+
+      @media_records << model
+
+      unless model.valid?
+        attrs[:errors] = model.errors
+        @all_records_valid = false
+      end
+    end
+
+    if @all_records_valid
+      nil
+    else
+      ServiceResult.new.tap do |result|
+        result.success = false
+        result[:attributes_and_errors] = media_attribute_set.map { |a| {media_type_name => a} }
+      end
+    end
+  end
+
+  def create_media
+    media_records.each do |model|
+      if model.save
+        AddMediaToAlbumService.invoke(album_id: album_id, media_type: plural_media_type_name, media_type_id: model.id)
+
+      end
+    end
+
+    ServiceResult.new.tap do |result|
+      result.success = true
+      result[plural_media_type_name] = media_records
+    end
   end
 
   def media_attribute_set
-    @media_attribute_set ||= options.fetch(plural_media_type_name, [])
+    @media_attribute_set ||= options.fetch(plural_media_type_name, []).map { |a| a[media_type_name] }
   end
 
   def params_with_whitelist(a)
-    ActionController::Parameters.new(a.merge(album_id: album_id)).permit(*allowed_attributes)
+    ActionController::Parameters.new(a).permit(*allowed_attributes)
   end
 
   def allowed_attributes
@@ -61,10 +111,6 @@ class CreateMultipleMediaService < ServiceBase
 
   def default_allowed_attributes
     [:name, :url, :description, :album_id, :taken_at]
-  end
-
-  def album_id
-    options[:album_id]
   end
 
   def media_type

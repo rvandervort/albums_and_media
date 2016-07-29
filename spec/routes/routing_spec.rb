@@ -26,6 +26,10 @@ RSpec.describe "Routing" , type: :routing do
       ) }
 
       it { expect(post("/albums/123/photos")).to route_to(controller: "photos", action: "create", album_id: "123")}
+
+      it { expect(post("/albums/123/photos/567")).to route_to(controller: "content_lists", action: "create", album_id: "123", media_type: "photos", media_type_id: "567") }
+
+      it { expect(delete("/albums/123/photos/567")).to route_to(controller: "content_lists", action: "destroy", album_id: "123", media_type: "photos", media_type_id: "567") }
     end
   end
 
@@ -44,6 +48,10 @@ RSpec.describe "Routing" , type: :routing do
       ) }
 
       it { expect(post("/albums/123/videos")).to route_to(controller: "videos", action: "create", album_id: "123")}
+
+      it { expect(post("/albums/123/videos/567")).to route_to(controller: "content_lists", action: "create", album_id: "123", media_type: "videos", media_type_id: "567") }
+
+      it { expect(delete("/albums/123/videos/567")).to route_to(controller: "content_lists", action: "destroy", album_id: "123", media_type: "videos", media_type_id: "567") }
     end
   end
 

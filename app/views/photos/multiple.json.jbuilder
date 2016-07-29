@@ -1,3 +1,1 @@
-json.photos do
-  json.array! @photos
-end
+json.photos @photos, partial: 'photos/photo', as: :photo

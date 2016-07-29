@@ -1,8 +1,9 @@
 class Album < ActiveRecord::Base
-  include ActiveModel::Validations
+  has_many :content_list, dependent: :destroy
+  has_many :photos, through: :content_list, source: :asset, source_type: "Photo"
+  has_many :videos, through: :content_list, source: :asset, source_type: "Video"
 
-  has_many :photos, inverse_of: :album, dependent: :destroy
-  has_many :videos, inverse_of: :album, dependent: :destroy
+  include ActiveModel::Validations
 
   validates_with NameValidator, PositionValidator
 
@@ -11,6 +12,10 @@ class Album < ActiveRecord::Base
   end
 
   def full?
-    (photos_count + videos_count) >= self.class.max_media
+    content_list.count >= self.class.max_media
+  end
+
+  def will_be_full_by_adding?(media_count)
+    (content_list.count + media_count) >= self.class.max_media
   end
 end

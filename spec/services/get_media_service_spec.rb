@@ -13,7 +13,8 @@ RSpec.shared_examples "a media listing service for asset type" do |asset_type, v
 
     let(:assets) {
       20.times.map do |i|
-        album.send(plural_asset_type_name) << asset_type.create(name: asset_type.name, url: "http://,#{valid_extension}")
+        model = asset_type.create(name: asset_type.name, url: "http://,#{valid_extension}")
+        ContentList.create(album: album, asset: model)
       end
     }
 

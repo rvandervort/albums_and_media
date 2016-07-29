@@ -12,28 +12,16 @@ class UpdateMediaService < ServiceBase
   def update_asset
     result = ServiceResult.new
 
-    old_album_id = asset_record.album_id
-
     if asset_record.update(attributes)
       result.success = true
       result[media_class_name] = asset_record
 
-      update_average_dates(old_album_id, attributes[:album_id])
     else
       result.success = false
       result[:errors] = asset_record.errors
     end
 
     result
-  end
-
-  def update_average_dates(old_album_id, new_album_id)
-    unless new_album_id.nil?
-      if old_album_id != new_album_id
-        AverageDateUpdaterService.invoke(id: old_album_id)
-        AverageDateUpdaterService.invoke(id: attributes[:album_id])
-      end
-    end
   end
 
   def invalid_record

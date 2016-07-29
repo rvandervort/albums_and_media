@@ -13,7 +13,7 @@ RSpec.shared_examples "a multiple-record media creation service for asset type" 
 
     context "for valid inputs", :db => true do
       let(:asset_list) {
-        (1..3).map { |i| {name: i, url: "http://asset_#{i}.#{valid_extension}", album_id: album.id} }
+        (1..3).map { |i| {asset_type_name => {name: i, url: "http://asset_#{i}.#{valid_extension}"}} }
       }
 
       it "creates a asset record for each entry" do
@@ -21,7 +21,7 @@ RSpec.shared_examples "a multiple-record media creation service for asset type" 
       end
 
       it "recalculates the album's average date" do
-        expect(AverageDateUpdaterService).to receive(:invoke).with(album_id: album.id)
+        expect(AverageDateUpdaterService).to receive(:invoke).with(album_id: album.id).exactly(3).times
         service.execute!
       end
 
@@ -40,40 +40,35 @@ RSpec.shared_examples "a multiple-record media creation service for asset type" 
 
     context "for invalid inputs" do
       let(:asset_list) {
-        (1..3).map { |i| {name: i, url: "http://asset_#{i}.#{valid_extension}", album_id: album.id} }
+        (1..3).map { |i| {asset_type_name => {name: i, url: "http://asset_#{i}.#{valid_extension}"} } }
       }
 
-      it "does not create any assets unless they all have the same album id" do
-        asset_list.last[:album_id] += 1
-        expect { service.execute! }.not_to change { asset_type.count }
-      end
-
       it "does not create any assets unless they all pass validation" do
-        asset_list.last[:url] = "andinvalidurl#@!"
+        asset_list.last[asset_type_name][:url] = "andinvalidurl#@!"
 
         expect { service.execute! }.not_to change { asset_type.count }
       end
 
 
       it "returns an unsuccessful ServiceResult" do
-        asset_list.last[:url] = "andinvalidurl"
-        asset_list[1][:name] = ""
+        asset_list.last[asset_type_name][:url] = "andinvalidurl"
+        asset_list[1][asset_type_name][:name] = ""
 
         expect(result).not_to be_success
       end
 
       it "returns each set of attributes and the errors for each" do
-        asset_list.last[:url] = "andinvalidurl"
-        asset_list[1][:name] = ""
+        asset_list.last[asset_type_name][:url] = "andinvalidurl"
+        asset_list[1][asset_type_name][:name] = ""
 
         asset_list_attributes = result[:attributes_and_errors]
 
-        expect(asset_list_attributes.last[:errors][:url]).not_to be_nil
-        expect(asset_list_attributes[1][:errors][:name]).not_to be_nil
+        expect(asset_list_attributes.last[asset_type_name][:errors][:url]).not_to be_nil
+        expect(asset_list_attributes[1][asset_type_name][:errors][:name]).not_to be_nil
       end
 
       it "does not update the albums average_date" do
-        asset_list[1][:name] = nil
+        asset_list[1][asset_type_name][:name] = nil
         
         expect(AverageDateUpdaterService).not_to receive(:invoke)
         service.execute!

@@ -77,7 +77,7 @@ class VideosController < ApplicationController
   private
 
   def create_single
-    result = CreateMediaService.invoke(media_type: Video, video: create_params.merge(album_id: params[:album_id]))
+    result = CreateMediaService.invoke(media_type: Video, video: create_params, album_id: params[:album_id])
 
     respond_to do |format|
       format.json do
@@ -105,7 +105,7 @@ class VideosController < ApplicationController
           render 'videos/multiple', status: :created
         else
           @videos = result[:attributes_and_errors]
-          render 'videos/multiple', status: :unprocessable_entity
+          render 'videos/attributes_and_errors', status: :unprocessable_entity
         end
       end
     end
