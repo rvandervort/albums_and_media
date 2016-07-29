@@ -33,3 +33,20 @@ Anything can be changed if you think it's needed, including the gemfile, databas
 Run `bundle install` and `rake db:migrate`.
 
 You can populate your database with fake data by running `rake db:seed`.
+
+# ASSUMPTIONS
+## General
+1. Completely open API with no authentication or restriction
+2. Specs should be written
+## For Albums
+1. Position is a physical presentation counter and must be updated when albums are created, updated (shifted), or destroyed
+2. Upon destruction, clients will be able to identify which photos are affected without feedback from the API
+3. the "no more than 60" rule applies to the sum of photo and video counts
+4. When posting multiple photos/videos in a single request, they are to belong to the same album. Therefore, the POST is made to /albums/:album_id/:media_type
+## For Photos
+1. The actual transfer of binary photo/video data is handled separately. This API is only for the metadata surrounding the photos
+2. Adding an existing photo to an existing album should be done through POST to /albums/:album_id/photos/:photo_id.  Removal using DELETE at the same path
+## For Videos
+1. Similar attributes and validations are required (from photos), with different file extension validations.
+2. Adding existing videos to an album should follow the same pattern as for photos
+
