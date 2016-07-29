@@ -11,11 +11,15 @@ class Album < ActiveRecord::Base
     60
   end
 
-  def full?
-    content_list.count >= self.class.max_media
+  def current_media_count
+    photos_count + videos_count
   end
 
-  def will_be_full_by_adding?(media_count)
-    (content_list.count + media_count) >= self.class.max_media
+  def full?
+    current_media_count >= self.class.max_media
+  end
+
+  def will_be_full_by_adding?(new_media_count)
+    (current_media_count + new_media_count) >= self.class.max_media
   end
 end
