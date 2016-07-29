@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160729002602) do
+ActiveRecord::Schema.define(version: 20160729144054) do
 
   create_table "albums", force: :cascade do |t|
     t.string   "name"
@@ -19,6 +19,8 @@ ActiveRecord::Schema.define(version: 20160729002602) do
     t.date     "average_date"
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
+    t.integer  "photos_count"
+    t.integer  "videos_count"
   end
 
   add_index "albums", ["position"], name: "index_albums_on_position"
